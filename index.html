@@ -1,24 +1,17 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Rota View — Estrada do Encanamento</title>
-<meta name="description" content="Diagnóstico interativo de defeitos do pavimento da Estrada do Encanamento (Recife/PE): mapa de danos, vista de rua, memorial fotográfico e relatório técnico — Rota Engenharia.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17181A">
-<meta name="color-scheme" content="dark">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Rota View — Estrada do Encanamento">
-<meta property="og:description" content="Diagnóstico interativo de defeitos do pavimento · Rota Engenharia · DNIT 005/2003">
-<meta property="og:image" content="assets/img/croqui-trecho.webp">
-<link rel="icon" type="image/png" href="favicon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Rota View — Estrada do Encanamento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
 <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+
 <div id="app">
 
   <!-- ============ MAPA ============ -->
@@ -54,9 +47,9 @@
     </nav>
 
     <div class="legenda">
-      <div class="linha"><span class="bolinha" style="background:var(--alta)"></span><span class="longo">Severidade alta — panela aberta</span><span class="curto">Alta</span></div>
-      <div class="linha"><span class="bolinha" style="background:var(--ouro)"></span><span class="longo">Severidade média</span><span class="curto">Média</span></div>
-      <div class="linha"><span class="bolinha" style="background:var(--cinza)"></span><span class="longo">Sem severidade atribuída</span><span class="curto">Sem sev.</span></div>
+      <div class="linha"><span class="bolinha" style="background:var(--alta)"></span>Severidade alta — panela aberta</div>
+      <div class="linha"><span class="bolinha" style="background:var(--ouro)"></span>Severidade média</div>
+      <div class="linha"><span class="bolinha" style="background:var(--cinza)"></span>Sem severidade atribuída</div>
     </div>
 
     <div class="dock">
@@ -111,7 +104,7 @@
           <span class="rua" id="endRua">—</span>
           <span class="coord" id="endCoord">—</span>
         </div>
-        <div class="bloco bloco-logo"><img class="logo" src="assets/img/logo-rota.webp" alt="Rota Engenharia"></div>
+        <div class="bloco"><img class="logo" src="assets/img/logo-rota.webp" alt="Rota Engenharia"></div>
       </div>
 
       <button class="abrir-dossie" id="btnDossie">
@@ -188,7 +181,7 @@
         <button role="tab" data-aba="causas" aria-selected="false">Mapa de causas</button>
         <button role="tab" data-aba="relatorio" aria-selected="false">Relatório</button>
       </div>
-      <button class="fechar-painel" id="fecharPainel" aria-label="Fechar e voltar ao mapa"><span aria-hidden="true">✕</span> <span class="so-desk">Voltar ao mapa</span><span class="so-mob">Mapa</span></button>
+      <button class="fechar-painel" id="fecharPainel" aria-label="Fechar e voltar ao mapa">✕ Voltar ao mapa</button>
     </div>
 
     <div class="painel-corpo">
@@ -199,7 +192,7 @@
         <span class="rotulo">Apêndice A</span>
         <h2 class="tit">Memorial fotográfico</h2>
         <p class="sub">Nove ocorrências registradas nas vistorias de 03, 04 e 06 de outubro de 2026</p>
-        <p class="txt-col">Cada fotografia traz, gravada na própria imagem, a data, a hora, o endereço aproximado e as coordenadas geográficas obtidas em campo (precisão informada de ±14 m). Toque em uma foto para ampliá-la, ou use <strong>Ver na via</strong> para abrir a ocorrência no modo imersivo.</p>
+        <p class="txt-col">Cada fotografia traz, gravada na própria imagem, a data, a hora, o endereço aproximado e as coordenadas geográficas obtidas em campo (precisão informada de ±14 m). Clique em uma foto para ampliá-la, ou use <strong>Ver na via</strong> para abrir a ocorrência no modo imersivo.</p>
         <h3 class="sec">Fichas das ocorrências</h3>
         <div class="memorial" id="gradeMemorial"></div>
       </div>
@@ -220,13 +213,19 @@
           <div class="prancha-topo">
             <span class="nome">PR-01 · Planta linear de danos</span>
             <span class="esc">Esc. horizontal 1:2000 · Esc. transversal 1:200 (escalas distintas)</span>
+            <div class="prancha-ctrl" data-ctrl="cadPlanta">
+              <button data-z="-1" aria-label="Reduzir a prancha">−</button>
+              <button data-z="1" aria-label="Ampliar a prancha">+</button>
+              <button class="ajustar" data-z="0">Ajustar</button>
+            </div>
           </div>
           <svg id="cadPlanta" aria-label="Planta linear com a localização dos nove defeitos"></svg>
         </div>
+        <div class="chips-ocor" id="chipsDanos"><span class="ct">Ir para</span></div>
         <div class="explica" id="explicaDanos"></div>
         <p class="dica-rolagem">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--ouro)" aria-hidden="true"><path d="M1 8h14M11 4l4 4-4 4"/><path d="M0 7h16v2H0z" opacity=".001"/><path d="M10.5 3.2 15.3 8l-4.8 4.8-1.4-1.4L11.1 9H.8V7h10.3L9.1 4.6z"/></svg>
-          Deslize a prancha para o lado para percorrer os 2.549 m do trecho. Toque em uma ocorrência para ver a explicação.
+          Arraste a prancha para a direita para percorrer os 2.549 m do trecho.
         </p>
 
         <h3 class="sec">Legenda de hachuras</h3>
@@ -250,9 +249,15 @@
           <div class="prancha-topo">
             <span class="nome">PR-02 · Mapa de possíveis causas</span>
             <span class="esc">Esc. horizontal 1:2000 · Esc. transversal 1:200</span>
+            <div class="prancha-ctrl" data-ctrl="cadCausas">
+              <button data-z="-1" aria-label="Reduzir a prancha">−</button>
+              <button data-z="1" aria-label="Ampliar a prancha">+</button>
+              <button class="ajustar" data-z="0">Ajustar</button>
+            </div>
           </div>
           <svg id="cadCausas" aria-label="Planta linear temática com os agentes deflagradores de cada defeito"></svg>
         </div>
+        <div class="chips-ocor" id="chipsCausas"><span class="ct">Ir para</span></div>
         <div class="explica" id="explicaCausas"></div>
 
         <h3 class="sec">Os quatro agentes</h3>
@@ -260,7 +265,7 @@
 
         <h3 class="sec">Ciclo de degradação observado na via</h3>
         <p class="txt-col">A sequência abaixo é a leitura que o conjunto das nove ocorrências permite fazer: o mesmo processo aparece em estágios diferentes ao longo do trecho — da malha de fadiga ainda fechada (defeito 04) até a cavidade aberta com água dentro (defeito 06).</p>
-        <div class="prancha prancha-fluxo">
+        <div class="prancha" style="background:var(--carvao-2)">
           <svg id="fluxoCausas" aria-label="Ciclo de degradação do pavimento, da fadiga até a panela"></svg>
         </div>
 
@@ -300,7 +305,7 @@
         <div class="olho"><span class="nn">02</span><span class="tt">Localização</span></div>
         <p class="sub-sec">Croqui do trecho estudado</p>
         <figure class="figura">
-          <img src="assets/img/croqui-trecho.webp" width="1480" height="559" loading="lazy" decoding="async" alt="Croqui do trecho da Estrada do Encanamento, do Hospital de Olhos ao Clube Alemão">
+          <img src="assets/img/croqui-trecho.webp" alt="Croqui do trecho da Estrada do Encanamento, do Hospital de Olhos ao Clube Alemão">
           <figcaption><b>Figura 1 — Croqui de localização.</b> Trecho marcado: Estrada do Encanamento, do Hospital de Olhos ao Clube Alemão (≈ 700 m). Como a via é contínua e mantém as mesmas características de tráfego e de pavimento, o levantamento foi estendido a leste, cobrindo cerca de 2,5 km entre o primeiro e o último defeito registrado. Fonte: Google Maps (2026), adaptado pela equipe.</figcaption>
         </figure>
 
@@ -350,61 +355,13 @@
         <h3 class="sec">Síntese</h3>
         <p>O levantamento identificou <strong>nove ocorrências de sete tipos distintos</strong> pela terminologia da Norma DNIT 005/2003 – TER (J, JE, P, RS, D, ALP e O), registradas nas vistorias de 03, 04 e 06 de outubro de 2026, com registro fotográfico georreferenciado.</p>
         <p>Seis das nove ocorrências (06, 07, 11, 15, 16 e 19) estão na faixa junto ao meio-fio ou na própria sarjeta — justamente onde a água se acumula e por onde trafegam os ônibus e caminhões. Três agentes predominam: <strong>a água mal drenada junto ao meio-fio</strong>, <strong>o tráfego pesado concentrado nessa faixa</strong> e <strong>o envelhecimento do revestimento</strong>, agravado por reparos que não trataram a origem dos problemas.</p>
-        <p>Por se tratar de avaliação exclusivamente visual, não foram realizadas medições, sondagens ou ensaios. As conclusões sobre as camadas inferiores são inferências a partir do tipo e da posição dos defeitos e devem ser confirmadas pela investigação proposta.</p>
+        <p>Por se tratar de avaliação exclusivamente visual, não foram realizadas medições, sondagens ou ensaios. As conclusões sobre as camadas inferiores são inferências a partir do tipo e da posição dos defeitos e devem ser confirmadas por investigação específica, com sondagens e ensaios.</p>
 
         <h3 class="sec">Quadro-resumo das ocorrências</h3>
         <div class="tab-wrap">
           <table>
             <thead><tr><th>Nº</th><th>Cód.</th><th>Defeito</th><th>Classe / severidade</th><th>Posição na via</th><th>Dist.</th></tr></thead>
             <tbody id="tabResumo"></tbody>
-          </table>
-        </div>
-
-        <h3 class="sec">Geometria e drenagem</h3>
-        <p>Pista simples em CBUQ, confinada por meio-fio e sarjeta, sem acostamento. Duas faixas de rolamento separadas por linha branca tracejada e ciclofaixa demarcada em vermelho junto a um dos bordos. Por estimativa visual, cada faixa tem entre 3,0 m e 3,5 m e a ciclofaixa cerca de 1,5 m, resultando em plataforma da ordem de 8 m a 9 m entre meios-fios — dimensões a confirmar com trena.</p>
-        <p>A drenagem é exclusivamente superficial. A avaliação visual indica eficiência insuficiente em pontos localizados: empoçamento permanente na sarjeta da parada de ônibus (defeito 11) e dentro da panela do nº 863 (defeito 06); obstrução das sarjetas por folhas e papéis acumulados (defeitos 15 e 16); e juntas abertas entre o revestimento e o meio-fio, por onde a água infiltra nas camadas do pavimento.</p>
-
-        <h3 class="sec">Proposta de intervenção de terraplenagem</h3>
-        <p>Panelas, trincas com erosão e afundamentos plásticos indicam que o comprometimento não se limita ao revestimento: a água já atingiu a base e, possivelmente, o subleito. Nesses pontos, um novo remendo superficial repetiria o ciclo observado no defeito 07. Propõe-se a <strong>reconstrução localizada das camadas do pavimento</strong>, associada à correção da drenagem que deu origem aos defeitos.</p>
-        <ul>
-          <li><strong>Investigação prévia</strong> — sondagens a trado ou poços de inspeção nos pontos críticos; ensaios de caracterização, Proctor e ISC; cadastro das redes enterradas junto às concessionárias.</li>
-          <li><strong>Demarcação e corte</strong> — segmentos retangulares com folga de ≈0,30 m além da área afetada e corte com serra para obter bordas verticais.</li>
-          <li><strong>Escavação (corte de caixa)</strong> — remoção do revestimento e da base comprometidos, com profundidade estimada de 0,40 m a 0,60 m, a confirmar pelas sondagens.</li>
-          <li><strong>Tratamento do subleito</strong> — substituição do solo saturado por solo selecionado, compactado em camadas de até 0,20 m com controle de umidade e grau de compactação.</li>
-          <li><strong>Drenagem</strong> — regularização da declividade das sarjetas, limpeza e ampliação das bocas de lobo e dreno raso longitudinal junto ao meio-fio nos pontos de empoçamento (defeitos 06 e 11).</li>
-          <li><strong>Recomposição do pavimento</strong> — base em brita graduada simples, imprimação, pintura de ligação e revestimento em CBUQ, com selagem das juntas.</li>
-        </ul>
-
-        <h3 class="sec">Ordem de prioridade</h3>
-        <div class="prioridades">
-          <div class="prio"><span class="ordem">1</span><span class="d"><b>Reconstrução localizada — defeitos 06, 07 e 18</b>Panelas de severidade alta, com cavidade aberta e risco imediato a motociclistas e ciclistas.</span></div>
-          <div class="prio"><span class="ordem">2</span><span class="d"><b>Trincas com erosão e deformações em remendo — defeitos 19, 15 e 16</b>Estágio em que a água penetra livremente e o material começa a se desprender.</span></div>
-          <div class="prio"><span class="ordem">3</span><span class="d"><b>Fresagem e recomposição — defeitos 04, 09 e 11</b>Tratamento sem escavação, desde que a drenagem seja corrigida em conjunto.</span></div>
-        </div>
-        <p>A correção da drenagem deve acompanhar todas as etapas, pois, sem ela, os defeitos tendem a reaparecer.</p>
-
-        <h3 class="sec">Riscos da intervenção</h3>
-        <ul>
-          <li>Interferência com redes enterradas de água, esgoto, energia, gás e telecomunicações — o próprio nome da via remete à antiga tubulação de abastecimento que acompanhava seu traçado.</li>
-          <li>Instabilidade das paredes da escavação, do meio-fio e da calçada adjacente.</li>
-          <li>Danos às raízes das árvores de grande porte, com risco de comprometer sua estabilidade.</li>
-          <li>Chuvas durante a obra, que saturam o subleito exposto — recomenda-se executar no período seco (setembro a fevereiro).</li>
-          <li>Recalques futuros caso o controle de compactação seja insuficiente.</li>
-          <li>Acidentes com pedestres, ciclistas e motociclistas na área de obra.</li>
-        </ul>
-
-        <h3 class="sec">Impactos e medidas mitigadoras</h3>
-        <div class="tab-wrap tab-mitigacao">
-          <table>
-            <thead><tr><th>Impacto</th><th>Medida mitigadora</th></tr></thead>
-            <tbody>
-              <tr><td>Tráfego e mobilidade</td><td>Execução por segmentos em meia pista, sinalização de obra, desvio provisório da ciclofaixa e da parada de ônibus, trabalho fora dos horários de pico.</td></tr>
-              <tr><td>Acesso de lindeiros</td><td>Comunicação prévia aos moradores e estabelecimentos; manutenção permanente de passagem para garagens e veículos de emergência.</td></tr>
-              <tr><td>Poeira e ruído</td><td>Umectação das áreas de trabalho, caminhões com caçamba coberta e restrição de horário para equipamentos ruidosos.</td></tr>
-              <tr><td>Resíduos e sedimentos</td><td>Destinação a áreas licenciadas conforme CONAMA 307/2002, reaproveitamento do fresado, proteção das bocas de lobo e limpeza das galerias ao final.</td></tr>
-              <tr><td>Arborização</td><td>Acompanhamento de profissional habilitado, escavação manual junto às raízes e autorização do órgão municipal para eventuais podas.</td></tr>
-              <tr><td>Redes enterradas</td><td>Cadastro junto às concessionárias, sondagens e escavação manual nas proximidades das redes.</td></tr>
-            </tbody>
           </table>
         </div>
 
@@ -436,5 +393,3 @@
 </div>
 
 <script src="app.js" defer></script>
-</body>
-</html>

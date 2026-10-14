@@ -1,4 +1,3 @@
-"use strict";
 /* =================== DADOS =================== */
 /* x,y em metros a partir do defeito 06 (ponto mais a oeste). x = leste, y = sul.
    cad.y0 = início da ocorrência na seção transversal, medido da borda da ciclofaixa (0,00)
@@ -261,71 +260,37 @@ let gMapa, viaPath;
 })();
 
 let vista = {x:0, y:0, k:1};
-/* os pinos são compensados pelo zoom: nunca ficam menores que ~36 px na tela (alvo de toque) */
-const PINOS = [...mapa.querySelectorAll(".pino")];
-function aplicarVista(){
-  gMapa.setAttribute("transform", `translate(${vista.x} ${vista.y}) scale(${vista.k})`);
-  const s = Math.max(1, .58 / vista.k);
-  PINOS.forEach((p, i) => p.setAttribute("transform", `translate(${DEFEITOS[i].x} ${DEFEITOS[i].y}) scale(${s})`));
-}
+const aplicarVista = () => gMapa.setAttribute("transform", `translate(${vista.x} ${vista.y}) scale(${vista.k})`);
 function paraSvg(cx, cy){
   const p = mapa.createSVGPoint(); p.x = cx; p.y = cy;
   return p.matrixTransform(mapa.getScreenCTM().inverse());
 }
-const K_MIN = .35, K_MAX = 5;
-/* zoom ancorado num ponto da tela (cursor, centro da pinça ou centro do mapa) */
-function zoomEm(cx, cy, k2){
-  k2 = Math.max(K_MIN, Math.min(K_MAX, k2));
-  const p = paraSvg(cx, cy);
+mapa.addEventListener("wheel", e => {
+  e.preventDefault();
+  const k2 = Math.max(.55, Math.min(4, vista.k * (e.deltaY < 0 ? 1.12 : 1/1.12)));
+  const p = paraSvg(e.clientX, e.clientY);
   vista.x = p.x - (p.x - vista.x) * (k2 / vista.k);
   vista.y = p.y - (p.y - vista.y) * (k2 / vista.k);
   vista.k = k2; aplicarVista();
-}
-function centroMapa(){ const r = mapa.getBoundingClientRect(); return [r.left + r.width/2, r.top + r.height/2]; }
-mapa.addEventListener("wheel", e => {
-  e.preventDefault();
-  zoomEm(e.clientX, e.clientY, vista.k * (e.deltaY < 0 ? 1.12 : 1/1.12));
 }, {passive:false});
-$("#zMais").onclick  = () => { const [x, y] = centroMapa(); zoomEm(x, y, vista.k * 1.35); };
-$("#zMenos").onclick = () => { const [x, y] = centroMapa(); zoomEm(x, y, vista.k / 1.35); };
+$("#zMais").onclick  = () => { vista.k = Math.min(4, vista.k * 1.35); aplicarVista(); };
+$("#zMenos").onclick = () => { vista.k = Math.max(.55, vista.k / 1.35); aplicarVista(); };
 
-/* arrastar com um dedo/mouse; pinça com dois dedos */
-const dedosMapa = new Map();
-let panDe = null, pinca = null;
-const distDedos = m => { const [a, b] = [...m.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
-const meioDedos = m => { const [a, b] = [...m.values()]; return {x:(a.x + b.x)/2, y:(a.y + b.y)/2}; };
-function iniciarPan(x, y){ panDe = {x, y, vx:vista.x, vy:vista.y}; }
+let panDe = null;
 mapa.addEventListener("pointerdown", e => {
   if (e.target.closest(".pino")) return;
-  dedosMapa.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  mapa.setPointerCapture(e.pointerId);
-  mapa.classList.add("arrastando");
-  if (dedosMapa.size === 1) iniciarPan(e.clientX, e.clientY);
-  else if (dedosMapa.size === 2){ panDe = null; pinca = {d:distDedos(dedosMapa), m:meioDedos(dedosMapa)}; }
+  panDe = {x:e.clientX, y:e.clientY, vx:vista.x, vy:vista.y};
+  mapa.classList.add("arrastando"); mapa.setPointerCapture(e.pointerId);
 });
 mapa.addEventListener("pointermove", e => {
-  if (!dedosMapa.has(e.pointerId)) return;
-  dedosMapa.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  if (pinca && dedosMapa.size >= 2){
-    const d = distDedos(dedosMapa), m = meioDedos(dedosMapa);
-    const ctm = mapa.getScreenCTM(), esc = ctm ? ctm.a : 1;
-    vista.x += (m.x - pinca.m.x) / esc; vista.y += (m.y - pinca.m.y) / esc;
-    zoomEm(m.x, m.y, vista.k * d / (pinca.d || d));
-    pinca = {d, m};
-    return;
-  }
+  if (panDe && pincaAtivaMapa()){ panDe = null; mapa.classList.remove("arrastando"); }
   if (!panDe) return;
-  const ctm = mapa.getScreenCTM(), esc = ctm ? ctm.a : 1;
+  const m = mapa.getScreenCTM(), esc = m ? m.a : 1;
   vista.x = panDe.vx + (e.clientX - panDe.x) / esc;
   vista.y = panDe.vy + (e.clientY - panDe.y) / esc;
   aplicarVista();
 });
-const fimPan = e => {
-  dedosMapa.delete(e.pointerId);
-  if (dedosMapa.size < 2) pinca = null;
-  if (dedosMapa.size === 1){ const [p] = dedosMapa.values(); iniciarPan(p.x, p.y); }
-  if (dedosMapa.size === 0){ panDe = null; mapa.classList.remove("arrastando"); }
-};
+const fimPan = () => { panDe = null; mapa.classList.remove("arrastando"); };
 mapa.addEventListener("pointerup", fimPan);
 mapa.addEventListener("pointercancel", fimPan);
 
@@ -349,19 +314,13 @@ function aoSoltar(e){
   boneco.classList.remove("pegando");
   boneco.style.left = boneco.style.top = "";
   bonecoPai.appendChild(boneco);
-  destacar(null);
-  /* toque simples (sem arrastar): abre a primeira ocorrência — útil no celular */
-  if (inicioBoneco && Math.hypot(e.clientX - inicioBoneco.x, e.clientY - inicioBoneco.y) < 10){
-    irParaRua(0); return;
-  }
   const alvo = maisProximo(e.clientX, e.clientY);
+  destacar(null);
   if (alvo !== null) irParaRua(alvo);
   else { boneco.classList.add("pousando"); setTimeout(() => boneco.classList.remove("pousando"), 500); }
 }
-let inicioBoneco = null;
 boneco.addEventListener("pointerdown", e => {
   e.preventDefault();
-  inicioBoneco = {x:e.clientX, y:e.clientY};
   pegando = true; dica.hidden = true;
   boneco.classList.add("pegando");
   document.body.appendChild(boneco);
@@ -428,7 +387,6 @@ function irParaRua(i){
 function voltarMapa(){
   dossie.classList.remove("aberto");
   cenaRua.hidden = true; painel.hidden = true; cenaMapa.hidden = false;
-  requestAnimationFrame(enquadrar);
 }
 function carregar(i, chegando){
   const d = DEFEITOS[i];
@@ -457,45 +415,29 @@ function carregar(i, chegando){
 const aplicarPano = () => { camada.style.transform = `scale(${escala}) translate(${tx}%, ${ty}%)`; };
 const lim = () => (escala - 1) / 2 / escala * 100;
 
-let panoDe = null, pincaPano = null;
-const dedosPano = new Map();
-const limitarPano = () => { const L = lim(); tx = Math.max(-L, Math.min(L, tx)); ty = Math.max(-L, Math.min(L, ty)); };
+let panoDe = null;
 pano.addEventListener("pointerdown", e => {
   if (e.target.closest(".alvo")) return;
-  dedosPano.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  panoDe = {x:e.clientX, y:e.clientY, tx, ty};
   camada.style.transition = "none";
   pano.classList.add("arrastando"); pano.setPointerCapture(e.pointerId);
-  if (dedosPano.size === 1) panoDe = {x:e.clientX, y:e.clientY, tx, ty};
-  else if (dedosPano.size === 2){ panoDe = null; pincaPano = {d:distDedos(dedosPano), esc:escala}; }
 });
 pano.addEventListener("pointermove", e => {
-  if (!dedosPano.has(e.pointerId)) return;
-  dedosPano.set(e.pointerId, {x:e.clientX, y:e.clientY});
-  if (pincaPano && dedosPano.size >= 2){
-    escala = Math.max(1.05, Math.min(2.6, pincaPano.esc * distDedos(dedosPano) / (pincaPano.d || 1)));
-    limitarPano(); aplicarPano();
-    return;
-  }
+  if (panoDe && pincaAtivaPano()){ panoDe = null; pano.classList.remove("arrastando"); }
   if (!panoDe) return;
   const L = lim();
   tx = Math.max(-L, Math.min(L, panoDe.tx + (e.clientX - panoDe.x) / pano.clientWidth * 100 / escala));
   ty = Math.max(-L, Math.min(L, panoDe.ty + (e.clientY - panoDe.y) / pano.clientHeight * 100 / escala));
   aplicarPano();
 });
-const fimPano = e => {
-  dedosPano.delete(e.pointerId);
-  if (dedosPano.size < 2) pincaPano = null;
-  if (dedosPano.size === 1){ const [p] = dedosPano.values(); panoDe = {x:p.x, y:p.y, tx, ty}; return; }
-  if (dedosPano.size === 0){
-    panoDe = null; pano.classList.remove("arrastando"); camada.style.transition = "transform .35s ease";
-  }
-};
+const fimPano = () => { panoDe = null; pano.classList.remove("arrastando"); camada.style.transition = "transform .35s ease"; };
 pano.addEventListener("pointerup", fimPano);
 pano.addEventListener("pointercancel", fimPano);
 pano.addEventListener("wheel", e => {
   e.preventDefault();
   escala = Math.max(1.05, Math.min(2.6, escala * (e.deltaY < 0 ? 1.1 : 1/1.1)));
-  limitarPano();
+  const L = lim();
+  tx = Math.max(-L, Math.min(L, tx)); ty = Math.max(-L, Math.min(L, ty));
   camada.style.transition = "transform .25s ease"; aplicarPano();
 }, {passive:false});
 
@@ -512,29 +454,6 @@ $("#btnMiniMapa").onclick = voltarMapa;
 alvo.addEventListener("click", () => dossie.classList.add("aberto"));
 $("#btnDossie").onclick = () => dossie.classList.toggle("aberto");
 $("#fecharDossie").onclick = () => dossie.classList.remove("aberto");
-
-/* no celular, a ficha é uma folha inferior: arrastar o topo para baixo fecha */
-(function arrastarFicha(){
-  const topo = dossie.querySelector(".dossie-topo");
-  let y0 = null;
-  const folha = () => matchMedia("(max-width:860px)").matches;
-  topo.addEventListener("pointerdown", e => {
-    if (!folha() || e.target.closest("button")) return;
-    y0 = e.clientY; dossie.style.transition = "none"; topo.setPointerCapture(e.pointerId);
-  });
-  topo.addEventListener("pointermove", e => {
-    if (y0 === null) return;
-    dossie.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)`;
-  });
-  const soltar = e => {
-    if (y0 === null) return;
-    const dy = e.clientY - y0; y0 = null;
-    dossie.style.transition = ""; dossie.style.transform = "";
-    if (dy > 80) dossie.classList.remove("aberto");
-  };
-  topo.addEventListener("pointerup", soltar);
-  topo.addEventListener("pointercancel", soltar);
-})();
 
 function preencherDossie(d){
   $("#dCod").textContent = d.cod;
@@ -738,7 +657,7 @@ function desenharPlanta(svg, modo){
     const go = E("g", {class:"ocor", role:"button", tabindex:"0",
       "data-i":i, "data-modo":modo}, g);
     E("title", {}, go).textContent =
-      `Defeito ${d.n} — ${d.nome}. Toque ou clique para ver a explicação.`;
+      `Defeito ${d.n} — ${d.nome}. Clique para ver a explicação.`;
 
     /* realce vertical em toda a plataforma, para a ocorrência saltar aos olhos */
     E("rect", {class:"faixa-ocor", x:x1 - 5, y:Y(0) - 26, width:largPx + 10,
@@ -776,7 +695,7 @@ function desenharPlanta(svg, modo){
       ? d.agentes.map(k => AGENTES[k].curto).join(" + ") : HACHURAS[c.h].nome.split(" (")[0],
       {anc:"middle", cor:corD, fs:7.5, fw:700, ff:"Arial, sans-serif"});
 
-    const abrir = () => explicar(i, modo, true);
+    const abrir = () => explicar(i, modo);
     go.addEventListener("click", abrir);
     go.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); abrir(); }});
   });
@@ -900,27 +819,22 @@ function desenharDetalhe(d){
 }
 
 /* =================== FLUXO DE CAUSAS =================== */
-/* quebra um texto em linhas de até `max` caracteres */
-function quebrar(txt, max){
-  const linhas = []; let l = "";
-  txt.split(" ").forEach(p => {
-    if ((l + " " + p).trim().length > max && l){ linhas.push(l); l = p; }
-    else l = (l + " " + p).trim();
-  });
-  if (l) linhas.push(l);
-  return linhas;
-}
 function desenharFluxo(svg){
-  const largura = svg.parentNode.clientWidth || window.innerWidth;
-  if (largura < 760) return desenharFluxoVertical(svg, ETAPAS_FLUXO);
   svg.innerHTML = "";
   const W = 980, H = 280;
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.removeAttribute("width");
+  svg.setAttribute("width", W);
   const g = E("g", {}, svg);
   E("rect", {x:0, y:0, width:W, height:H, fill:"var(--carvao-2)"}, g);
 
-  const etapas = ETAPAS_FLUXO;
+  const etapas = [
+    ["01","Cargas repetidas","Ônibus e caminhões na faixa junto ao meio-fio","#C88E1B","04"],
+    ["02","Fadiga do revestimento","Malha de trincas interligadas, ainda fechada (FC-2)","#C88E1B","04 · 18"],
+    ["03","Infiltração de água","A água da sarjeta entra pelas fissuras e pelas juntas abertas","#3E7E96","19"],
+    ["04","Perda de suporte da base","O subleito satura e a capacidade de carga cai","#3E7E96","19 · 18"],
+    ["05","Desprendimento → panela","Os blocos se soltam e a cavidade se abre","#B4442A","06 · 07 · 18"],
+    ["06","Remendo sem tratar a causa","O reparo pontual recria o defeito no mesmo local","#B4442A","07 · 09 · 15 · 16"]
+  ];
   const cw = 142, gap = 24, y0 = 74, ch = 118;
   const x0 = (W - (etapas.length*cw + (etapas.length-1)*gap)) / 2;
 
@@ -933,10 +847,19 @@ function desenharFluxo(svg){
     E("rect", {x, y:y0, width:cw, height:ch, fill:"#1B1D20", stroke:"#3C3F44", "stroke-width":1, rx:2}, g);
     E("rect", {x, y:y0, width:cw, height:3, fill:cor}, g);
     T(g, x + 11, y0 + 24, n, {cor, fs:15, fw:700});
-    let ly = y0 + 44;
-    quebrar(tit, 17).forEach((l, j, arr) => { T(g, x + 11, ly, l, {cor:"#F2F2F3", fs:10.5, fw:700, ff:"Arial, sans-serif"}); if (j < arr.length - 1) ly += 13; });
-    let ly2 = ly + 16;
-    quebrar(txt, 22).forEach((l, j, arr) => { T(g, x + 11, ly2, l, {cor:"#9A9DA2", fs:8.2, ff:"Arial, sans-serif"}); if (j < arr.length - 1) ly2 += 10.5; });
+    const pal = tit.split(" ");
+    let linha = "", ly = y0 + 44;
+    pal.forEach(p => {
+      if ((linha + " " + p).trim().length > 17){ T(g, x + 11, ly, linha, {cor:"#F2F2F3", fs:10.5, fw:700, ff:"Arial, sans-serif"}); linha = p; ly += 13; }
+      else linha = (linha + " " + p).trim();
+    });
+    T(g, x + 11, ly, linha, {cor:"#F2F2F3", fs:10.5, fw:700, ff:"Arial, sans-serif"});
+    let l2 = "", ly2 = ly + 16;
+    txt.split(" ").forEach(p => {
+      if ((l2 + " " + p).trim().length > 22){ T(g, x + 11, ly2, l2, {cor:"#9A9DA2", fs:8.2, ff:"Arial, sans-serif"}); l2 = p; ly2 += 10.5; }
+      else l2 = (l2 + " " + p).trim();
+    });
+    T(g, x + 11, ly2, l2, {cor:"#9A9DA2", fs:8.2, ff:"Arial, sans-serif"});
     T(g, x + 11, y0 + ch - 9, "defeitos " + ocor, {cor, fs:7.5});
     if (i < etapas.length - 1)
       E("path", {d:`M ${x+cw+5} ${y0+ch/2} l ${gap-10} 0 m -6 -5 l 6 5 l -6 5`,
@@ -948,48 +871,6 @@ function desenharFluxo(svg){
   T(g, W/2, y0 + ch + 44, "sem tratar a drenagem e a base, o ciclo recomeça",
     {anc:"middle", cor:"#D9674A", fs:9, ff:"Arial, sans-serif"});
 }
-
-/* versão para telas estreitas: etapas empilhadas, com a seta de retorno pela direita */
-function desenharFluxoVertical(svg, etapas){
-  svg.innerHTML = "";
-  const W = 340, x = 16, cw = W - 52, ch = 92, gap = 22, y0 = 64;
-  const H = y0 + etapas.length*ch + (etapas.length - 1)*gap + 48;
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  svg.removeAttribute("width");
-  const g = E("g", {}, svg);
-  E("rect", {x:0, y:0, width:W, height:H, fill:"var(--carvao-2)"}, g);
-  T(g, x, 28, "CICLO DE DEGRADAÇÃO", {cor:"#D8DADD", fs:12, ls:1.6, fw:700});
-  T(g, x, 45, "da fadiga à panela — cada estágio aparece", {cor:"#6B6E73", fs:9.5, ff:"Arial, sans-serif"});
-  T(g, x, 57, "em um ponto diferente do trecho", {cor:"#6B6E73", fs:9.5, ff:"Arial, sans-serif"});
-
-  etapas.forEach(([n, tit, txt, cor, ocor], i) => {
-    const y = y0 + i*(ch + gap);
-    E("rect", {x, y, width:cw, height:ch, fill:"#1B1D20", stroke:"#3C3F44", "stroke-width":1, rx:2}, g);
-    E("rect", {x, y, width:3, height:ch, fill:cor}, g);
-    T(g, x + 14, y + 22, n, {cor, fs:14, fw:700});
-    T(g, x + 40, y + 22, tit, {cor:"#F2F2F3", fs:11.5, fw:700, ff:"Arial, sans-serif"});
-    quebrar(txt, 52).slice(0, 2).forEach((l, j) =>
-      T(g, x + 14, y + 42 + j*13, l, {cor:"#9A9DA2", fs:9.8, ff:"Arial, sans-serif"}));
-    T(g, x + 14, y + ch - 11, "defeitos " + ocor, {cor, fs:8.5});
-    if (i < etapas.length - 1){
-      const ax = x + cw/2, ay = y + ch + 4;
-      E("path", {d:`M ${ax} ${ay} l 0 ${gap - 8} m -5 -6 l 5 6 l 5 -6`, fill:"none", stroke:"#4A4E54", "stroke-width":1.3}, g);
-    }
-  });
-  const xr = x + cw + 14, yIni = y0 + ch/2, yFim = y0 + (etapas.length - 1)*(ch + gap) + ch/2;
-  E("path", {d:`M ${x + cw + 4} ${yFim} L ${xr} ${yFim} L ${xr} ${yIni} L ${x + cw + 4} ${yIni} m 6 -5 l -6 5 l 6 5`,
-    fill:"none", stroke:"#B4442A", "stroke-width":1.3, "stroke-dasharray":"6 4"}, g);
-  T(g, x, H - 18, "sem tratar a drenagem e a base, o ciclo recomeça", {cor:"#D9674A", fs:10, ff:"Arial, sans-serif"});
-}
-
-const ETAPAS_FLUXO = [
-    ["01","Cargas repetidas","Ônibus e caminhões na faixa junto ao meio-fio","#C88E1B","04"],
-    ["02","Fadiga do revestimento","Malha de trincas interligadas, ainda fechada (FC-2)","#C88E1B","04 · 18"],
-    ["03","Infiltração de água","A água da sarjeta entra pelas fissuras e pelas juntas abertas","#3E7E96","19"],
-    ["04","Perda de suporte da base","O subleito satura e a capacidade de carga cai","#3E7E96","19 · 18"],
-    ["05","Desprendimento → panela","Os blocos se soltam e a cavidade se abre","#B4442A","06 · 07 · 18"],
-    ["06","Remendo sem tratar a causa","O reparo pontual recria o defeito no mesmo local","#B4442A","07 · 09 · 15 · 16"]
-];
 
 /* =================== CONSTRUÇÃO DAS ABAS =================== */
 (function memorial(){
@@ -1099,7 +980,7 @@ $("#lupa").addEventListener("click", e => { if (e.target.id === "lupa") $("#lupa
 })();
 
 /* =================== EXPLICAÇÃO DAS PRANCHAS =================== */
-function explicar(i, modo, peloUsuario){
+function explicar(i, modo){
   const d = DEFEITOS[i];
   const box = $(modo === "causas" ? "#explicaCausas" : "#explicaDanos");
   const cor = modo === "causas" ? COR_AG[d.agentes[0]] : HCOR[d.cad.h];
@@ -1118,7 +999,7 @@ function explicar(i, modo, peloUsuario){
     <div class="fitas">
       <span class="fita ${d.sev === "alta" ? "alta" : d.sev === "media" ? "media" : "classe"}">${SEV_ROT[d.sev]}</span>
       <span class="fita classe">${d.classe}</span>
-      <span class="fita classe">${modo === "causas" ? HACHURAS[d.cad.h].nome.split(" (")[0] : "Prioridade " + d.prio}</span>
+      <span class="fita classe">${HACHURAS[d.cad.h].nome.split(" (")[0]}</span>
     </div>
     <div class="mini-campos">
       <div><span class="k">Coordenadas</span><span class="v">${d.aprox ? "sem georref." : d.lat + "<br>" + d.lon}</span></div>
@@ -1150,18 +1031,16 @@ function explicar(i, modo, peloUsuario){
       <span class="rotulo">O que o desenho representa</span>
       <p class="pq" style="margin-top:9px">A área hachurada é <b>${HACHURAS[d.cad.h].nome.toLowerCase()}</b> — ${HACHURAS[d.cad.h].desc.toLowerCase()}. Está desenhada sobre <b>${d.posicao.toLowerCase()}</b>, no estaqueamento <b>${fmt(d.dist)} m</b> a partir do defeito 06.</p>
       <span class="rotulo">O que foi registrado em campo</span>
-      <p class="pq" style="margin-top:9px">${d.desc}</p>
-      <span class="rotulo">Observação da equipe</span>
-      <p class="pq" style="margin-top:9px">${d.obs}</p>
-      <div class="acao">
-        <div class="p">${PRIO_ROT[d.prio]}</div>
-        <div class="t">${d.acao}</div>
-      </div>`;
+      <p class="pq" style="margin-top:9px">${d.desc}</p>`;
   }
 
   box.innerHTML = `<div class="lado">${esquerda}</div><div class="lado">${direita}
-    <p class="dica-clique">Toque em outra ocorrência na prancha para trocar esta explicação.</p></div>`;
+    <p class="dica-clique">Clique em outra ocorrência na prancha para trocar esta explicação.</p></div>`;
   box.querySelector("[data-ir]").onclick = () => irParaRua(i);
+
+  const chips = $(modo === "causas" ? "#chipsCausas" : "#chipsDanos");
+  if (chips) chips.querySelectorAll("button").forEach(b =>
+    b.setAttribute("aria-current", String(Number(b.dataset.i) === i)));
 
   /* realça a ocorrência escolhida na prancha correspondente */
   const svg = $(modo === "causas" ? "#cadCausas" : "#cadPlanta");
@@ -1169,17 +1048,146 @@ function explicar(i, modo, peloUsuario){
     const sel = Number(o.dataset.i) === i;
     o.querySelector(".faixa-ocor").setAttribute("opacity", sel ? .34 : .14);
   });
-  /* no celular a explicação fica abaixo da prancha: rola até ela para o toque ter resposta visível */
-  if (peloUsuario && matchMedia("(max-width:860px)").matches){
-    const r = box.getBoundingClientRect();
-    if (r.top > window.innerHeight * .55 || r.bottom < 0) box.scrollIntoView({behavior:"smooth", block:"start"});
-  }
 }
 
 desenharPlanta($("#cadPlanta"), "danos");
 desenharPlanta($("#cadCausas"), "causas");
+
+/* =================== PRANCHAS: ZOOM, ARRASTO E ATALHOS =================== */
+const ZOOM = {};
+function larguraBase(svg){ return Number(svg.getAttribute("width")); }
+
+function aplicarZoom(id){
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  const W = larguraBase(svg);
+  const z = ZOOM[id];
+  svg.style.width = (W * z) + "px";
+  svg.style.height = "auto";
+  cx.querySelectorAll('.prancha-ctrl button[data-z="1"],.prancha-ctrl button[data-z="-1"]')
+    .forEach(b => b.disabled = (b.dataset.z === "1" ? z >= 2.4 : z <= 0.18));
+}
+function ajustarLargura(id){
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  ZOOM[id] = Math.max(.12, (cx.clientWidth - 2) / larguraBase(svg));
+  aplicarZoom(id);
+}
+function zoomInicial(id){
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  /* no celular a prancha abre em tamanho natural (texto legível) e rola na horizontal;
+     em telas largas, abre ajustada se já couber */
+  const fit = (cx.clientWidth - 2) / larguraBase(svg);
+  ZOOM[id] = fit >= 1 ? fit : (innerWidth <= 760 ? 1 : Math.max(.42, fit));
+  aplicarZoom(id);
+}
+
+["cadPlanta", "cadCausas"].forEach(id => {
+  zoomInicial(id);
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  cx.querySelector(".prancha-ctrl").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const passo = Number(b.dataset.z);
+    if (passo === 0){ ajustarLargura(id); return; }
+    const meio = (cx.scrollLeft + cx.clientWidth / 2) / (larguraBase(svg) * ZOOM[id]);
+    ZOOM[id] = Math.max(.18, Math.min(2.4, ZOOM[id] * (passo > 0 ? 1.35 : 1/1.35)));
+    aplicarZoom(id);
+    cx.scrollLeft = meio * larguraBase(svg) * ZOOM[id] - cx.clientWidth / 2;
+  });
+
+  /* arrastar a prancha com o dedo ou com o mouse */
+  let de = null;
+  cx.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.target.closest(".ocor")) return;
+    de = {x:e.clientX, s:cx.scrollLeft, movido:false};
+  });
+  cx.addEventListener("pointermove", e => {
+    if (!de) return;
+    const dx = e.clientX - de.x;
+    if (Math.abs(dx) > 3){ de.movido = true; cx.classList.add("puxando"); }
+    if (de.movido){ cx.scrollLeft = de.s - dx; e.preventDefault(); }
+  });
+  const soltaPrancha = () => { de = null; cx.classList.remove("puxando"); };
+  cx.addEventListener("pointerup", soltaPrancha);
+  cx.addEventListener("pointercancel", soltaPrancha);
+  cx.addEventListener("pointerleave", soltaPrancha);
+});
+addEventListener("resize", () => { ["cadPlanta","cadCausas"].forEach(id => {
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  if (ZOOM[id] * larguraBase(svg) < cx.clientWidth) ajustarLargura(id);
+}); });
+
+/* centraliza a prancha na ocorrência escolhida */
+function focarOcorrencia(i, modo){
+  const id = modo === "causas" ? "cadCausas" : "cadPlanta";
+  const svg = document.getElementById(id), cx = svg.parentElement;
+  const alvo = svg.querySelector(`.ocor[data-i="${i}"] .disco`);
+  if (!alvo) return;
+  const x = Number(alvo.getAttribute("cx")) * (larguraBase(svg) * ZOOM[id]) / svg.viewBox.baseVal.width;
+  cx.scrollTo({left: Math.max(0, x - cx.clientWidth / 2), behavior:"smooth"});
+}
+
+/* atalhos: uma pastilha por ocorrência, essencial em tela pequena */
+["danos", "causas"].forEach(modo => {
+  const box = $(modo === "causas" ? "#chipsCausas" : "#chipsDanos");
+  [...DEFEITOS].sort((a, b) => a.dist - b.dist).forEach(d => {
+    const i = DEFEITOS.indexOf(d);
+    const b = document.createElement("button");
+    b.dataset.i = i;
+    b.setAttribute("aria-current", "false");
+    b.innerHTML = `<span class="pt" style="background:${modo === "causas" ? COR_AG[d.agentes[0]] : HCOR[d.cad.h]}"></span>${d.n} · ${d.cod}`;
+    b.onclick = () => { explicar(i, modo); focarOcorrencia(i, modo); };
+    box.appendChild(b);
+  });
+});
+
 explicar(0, "danos");
 explicar(0, "causas");
+
+/* =================== PINÇA (dois dedos) =================== */
+function pinca(el, aoEscalar){
+  const toques = new Map();
+  let base = 0;
+  el.addEventListener("pointerdown", e => {
+    if (e.pointerType !== "touch") return;
+    toques.set(e.pointerId, e);
+    if (toques.size === 2) base = distancia();
+  });
+  el.addEventListener("pointermove", e => {
+    if (e.pointerType !== "touch" || !toques.has(e.pointerId)) return;
+    toques.set(e.pointerId, e);
+    if (toques.size === 2 && base > 0){
+      e.preventDefault();
+      const d = distancia();
+      aoEscalar(d / base);
+      base = d;
+    }
+  }, {passive:false});
+  const fim = e => { toques.delete(e.pointerId); if (toques.size < 2) base = 0; };
+  el.addEventListener("pointerup", fim);
+  el.addEventListener("pointercancel", fim);
+  const distancia = () => {
+    const [a, b] = [...toques.values()];
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  };
+  return () => toques.size >= 2;
+}
+/* na foto: aproxima e afasta */
+const pincaAtivaPano = pinca(pano, f => {
+  escala = Math.max(1.05, Math.min(3.2, escala * f));
+  const L = lim();
+  tx = Math.max(-L, Math.min(L, tx)); ty = Math.max(-L, Math.min(L, ty));
+  camada.style.transition = "none";
+  aplicarPano();
+});
+/* no mapa: zoom mantendo o centro */
+const pincaAtivaMapa = pinca(mapa, f => {
+  const k2 = Math.max(.1, Math.min(6, vista.k * f));
+  const c = paraSvg(innerWidth / 2, innerHeight / 2);
+  vista.x = c.x - (c.x - vista.x) * (k2 / vista.k);
+  vista.y = c.y - (c.y - vista.y) * (k2 / vista.k);
+  vista.k = k2; aplicarVista();
+});
 desenharFluxo($("#fluxoCausas"));
 (function detalhes(){
   const box = $("#gradeDetalhes");
@@ -1201,66 +1209,29 @@ function abrirAba(nome){
   document.querySelectorAll('.abas button').forEach(b =>
     b.setAttribute("aria-selected", String(b.dataset.aba === nome)));
   $(".painel-corpo").scrollTop = 0;
-  const ativa = document.querySelector(`.abas button[data-aba="${nome}"]`);
-  if (ativa) ativa.scrollIntoView({block:"nearest", inline:"center"});
-  if (nome === "causas"){
-    const v = ($("#fluxoCausas").parentNode.clientWidth || window.innerWidth) < 760;
-    if (v !== fluxoVertical){ fluxoVertical = v; desenharFluxo($("#fluxoCausas")); }
-  }
 }
 document.querySelectorAll("[data-aba]").forEach(b => b.onclick = () => abrirAba(b.dataset.aba));
 $("#fecharPainel").onclick = voltarMapa;
 
-/* --------- enquadramento do mapa: 1 unidade do viewBox = 1 px do painel ---------
-   A área livre é medida a partir dos cartões fixos (que mudam de lugar entre celular e desktop),
-   para o trecho nunca ficar escondido atrás deles. */
+/* --------- enquadramento do mapa: 1 unidade do viewBox = 1 px do painel --------- */
 function enquadrar(){
-  if (cenaMapa.hidden) return;
   const W = mapa.clientWidth || 1200, H = mapa.clientHeight || 800;
   mapa.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  const R = mapa.getBoundingClientRect();
-  const rect = sel => { const el = document.querySelector(sel); if (!el) return null;
-    const b = el.getBoundingClientRect(); return b.width && b.height ? b : null; };
-  const id = rect(".painel-id .cartao-id"), dock = rect(".dock"), nav = rect(".nav-topo"), leg = rect(".legenda");
-  const estreito = W < 861;
-  let padE, padD, padT, padB;
-  if (estreito){
-    padE = 16; padD = 16;
-    padT = (id ? id.bottom - R.top : 0) + 12;
-    const tetoBaixo = Math.min(...[dock, nav, leg].filter(Boolean).map(b => b.top), R.bottom);
-    padB = R.bottom - tetoBaixo + 12;
-    /* se sobrar pouca altura (celular deitado), o mapa usa a faixa entre o cartão e o dock */
-    if (H - padT - padB < 160){ padT = 12; padB = (nav ? R.bottom - nav.top : 0) + 8; padE = (id ? id.right - R.left : 0) + 12; padD = (dock ? R.right - dock.left : 0) + 12; }
-  } else {
-    padE = (id ? id.right - R.left : 420) + 24;
-    padD = 40;
-    padT = Math.max(60, (nav ? nav.bottom - R.top : 0) + 16);
-    padB = 100;
-  }
-  const bb = estreito ? {x:-140, y:-170, w:2280, h:1760} : {x:-300, y:-340, w:2740, h:2200};
-  const lw = Math.max(120, W - padE - padD), lh = Math.max(120, H - padT - padB);
+  const estreito = W < 760;
+  /* mede os painéis fixos para o trecho nunca ficar escondido atrás deles */
+  const alturaDe = sel => { const e = document.querySelector(sel); return e ? e.getBoundingClientRect().height : 0; };
+  const larguraDe = sel => { const e = document.querySelector(sel); return e ? e.getBoundingClientRect().width : 0; };
+  const padE = estreito ? 16 : larguraDe(".painel-id") + 24;
+  const padD = estreito ? 16 : 40;
+  const padT = estreito ? alturaDe(".painel-id") + 16 : 90;
+  const padB = estreito ? alturaDe(".nav-topo") + alturaDe(".dock") + 24 : 110;
+  const bb = {x:-300, y:-340, w:2740, h:2200};
+  const lw = Math.max(200, W - padE - padD), lh = Math.max(200, H - padT - padB);
   vista.k = Math.min(lw / bb.w, lh / bb.h);
   vista.x = padE + (lw - bb.w * vista.k) / 2 - bb.x * vista.k;
   vista.y = padT + (lh - bb.h * vista.k) / 2 - bb.y * vista.k;
   aplicarVista();
 }
 enquadrar();
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(enquadrar);
-let tEnq, fluxoVertical = window.innerWidth < 760;
-addEventListener("resize", () => {
-  clearTimeout(tEnq);
-  tEnq = setTimeout(() => {
-    enquadrar();
-    const v = ($("#fluxoCausas").parentNode.clientWidth || window.innerWidth) < 760;
-    if (v !== fluxoVertical){ fluxoVertical = v; desenharFluxo($("#fluxoCausas")); }
-  }, 180);
-});
-
-/* --------- faixas roláveis: esmaece a borda direita enquanto houver conteúdo escondido --------- */
-document.querySelectorAll(".nav-topo, .abas").forEach(el => {
-  const atualizar = () => el.classList.toggle("tem-mais", el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  el.addEventListener("scroll", atualizar, {passive:true});
-  addEventListener("resize", atualizar);
-  new MutationObserver(atualizar).observe(document.getElementById("painel"), {attributes:true, attributeFilter:["hidden"]});
-  atualizar();
-});
+let tEnq;
+addEventListener("resize", () => { clearTimeout(tEnq); tEnq = setTimeout(enquadrar, 180); });
