@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rota View — Estrada do Encanamento</title>
+<meta name="description" content="Diagnóstico interativo de defeitos do pavimento da Estrada do Encanamento (Recife/PE): mapa de danos, vista de rua, memorial fotográfico e relatório técnico — Rota Engenharia.">
+<meta name="theme-color" content="#17181A">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Rota View — Estrada do Encanamento">
+<meta property="og:description" content="Diagnóstico interativo de defeitos do pavimento · Rota Engenharia · DNIT 005/2003">
+<meta property="og:image" content="assets/img/croqui-trecho.webp">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ MAPA ============ -->
+  <section class="cena" id="cenaMapa" aria-label="Mapa de danos">
+    <svg id="mapaSvg" viewBox="-260 -300 2680 2200" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
+
+    <div class="painel-id">
+      <div class="marca">
+        <img src="assets/img/logo-rota.webp" alt="Rota Engenharia">
+        <div>
+          <div class="nome">ROTA ENGENHARIA</div>
+          <div class="tag">Projetos que ligam o amanhã</div>
+        </div>
+      </div>
+      <div class="cartao-id">
+        <span class="rotulo">Relatório técnico sintético nº 001/2026</span>
+        <h1>Diagnóstico de defeitos do pavimento</h1>
+        <p class="via">Estrada do Encanamento · Recife / PE</p>
+        <div class="meta-id">
+          <div><span class="rotulo">Cliente</span><span class="v" style="font-family:var(--f-txt)">PoliEng</span></div>
+          <div><span class="rotulo">Norma</span><span class="v">DNIT 005/2003</span></div>
+          <div><span class="rotulo">Ocorrências</span><span class="v">9 · 7 tipos</span></div>
+          <div><span class="rotulo">Trecho levantado</span><span class="v">2.549 m</span></div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-topo" aria-label="Seções do relatório">
+      <button data-aba="memorial">Memorial fotográfico</button>
+      <button data-aba="danos">Mapa de danos</button>
+      <button data-aba="causas">Mapa de causas</button>
+      <button data-aba="relatorio">Relatório</button>
+    </nav>
+
+    <div class="legenda">
+      <div class="linha"><span class="bolinha" style="background:var(--alta)"></span><span class="longo">Severidade alta — panela aberta</span><span class="curto">Alta</span></div>
+      <div class="linha"><span class="bolinha" style="background:var(--ouro)"></span><span class="longo">Severidade média</span><span class="curto">Média</span></div>
+      <div class="linha"><span class="bolinha" style="background:var(--cinza)"></span><span class="longo">Sem severidade atribuída</span><span class="curto">Sem sev.</span></div>
+    </div>
+
+    <div class="dock">
+      <div class="zoom-grupo">
+        <button id="zMais" aria-label="Aproximar">+</button>
+        <button id="zMenos" aria-label="Afastar">−</button>
+      </div>
+      <div class="rotulo-destino" id="rotuloDestino" hidden></div>
+      <div class="boneco-base">
+        <div class="dica" id="dica">Arraste até a via</div>
+        <svg id="boneco" viewBox="0 0 36 46" role="button" tabindex="0"
+             aria-label="Arraste o boneco até a via para entrar no modo rua">
+          <ellipse cx="18" cy="43.5" rx="11" ry="2.5" fill="rgba(0,0,0,.35)"/>
+          <rect x="12.5" y="30" width="4.5" height="12" rx="2" fill="#2A2C2F"/>
+          <rect x="19" y="30" width="4.5" height="12" rx="2" fill="#2A2C2F"/>
+          <rect x="10.5" y="40" width="7.5" height="3.2" rx="1.6" fill="#17181A"/>
+          <rect x="18" y="40" width="7.5" height="3.2" rx="1.6" fill="#17181A"/>
+          <path d="M11 17c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5v12.5c0 1-.8 1.8-1.8 1.8H12.8c-1 0-1.8-.8-1.8-1.8z" fill="#C88E1B"/>
+          <path d="M11 17c0-3.3 3.1-5.5 7-5.5v19.8h-5.2c-1 0-1.8-.8-1.8-1.8z" fill="#E6AC35"/>
+          <rect x="6.5" y="17.5" width="4" height="12" rx="2" fill="#C88E1B"/>
+          <rect x="25.5" y="17.5" width="4" height="12" rx="2" fill="#C88E1B"/>
+          <circle cx="18" cy="8" r="6.2" fill="#2A2C2F"/>
+          <path d="M11.8 8a6.2 6.2 0 0 1 12.4 0z" fill="#4A4E54"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RUA ============ -->
+  <section class="cena" id="cenaRua" hidden aria-label="Vista de rua da ocorrência">
+    <div class="pano" id="pano">
+      <div class="pano-camada" id="panoCamada">
+        <div class="pano-foto" id="panoFoto"></div>
+        <div class="alvo" id="alvo">
+          <div class="alvo-in">
+            <div class="alvo-chip" id="alvoChip"><span class="cd"></span><span class="nm"></span></div>
+            <div class="alvo-haste"></div>
+            <div class="alvo-mira"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pano-vinheta"></div>
+    </div>
+
+    <div class="hud">
+      <div class="barra-end">
+        <button class="bloco voltar" id="btnVoltarMapa">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M7 1.5 1.5 8 7 14.5v-4h7.5v-5H7z"/></svg>
+          Mapa
+        </button>
+        <div class="bloco endereco">
+          <span class="rua" id="endRua">—</span>
+          <span class="coord" id="endCoord">—</span>
+        </div>
+        <div class="bloco bloco-logo"><img class="logo" src="assets/img/logo-rota.webp" alt="Rota Engenharia"></div>
+      </div>
+
+      <button class="abrir-dossie" id="btnDossie">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="7"/><rect x="7" y="6.5" width="2" height="5" fill="#1A1200"/><rect x="7" y="3.5" width="2" height="2" fill="#1A1200"/></svg>
+        Ficha técnica
+      </button>
+
+      <div class="chao">
+        <button class="seta-chao" id="btnAnt" aria-label="Ocorrência anterior">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3 7 12l8.5 9 2-1.9L10.9 12l6.6-7.1z"/></svg>
+        </button>
+        <div class="contador"><div class="n" id="contN">—</div><div class="km" id="contKm">—</div></div>
+        <button class="seta-chao" id="btnProx" aria-label="Próxima ocorrência">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3 17 12l-8.5 9-2-1.9L13.1 12 6.5 4.9z"/></svg>
+        </button>
+      </div>
+
+      <div class="mini">
+        <div class="titulo"><span class="rotulo">Eixo da via</span>
+          <button class="voltar-mapa" id="btnMiniMapa">ver mapa</button></div>
+        <svg id="miniSvg" viewBox="0 0 184 74" aria-hidden="true"></svg>
+      </div>
+
+      <div class="bussola" aria-hidden="true">
+        <svg viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="#4A4E54" stroke-width="1.5"/>
+          <path d="M24 7 29 24 24 20.5 19 24z" fill="#B4442A"/>
+          <path d="M24 41 19 24 24 27.5 29 24z" fill="#6B6E73"/>
+          <text x="24" y="6" text-anchor="middle" font-size="7" font-family="IBM Plex Mono,monospace" fill="#F2F2F3">N</text>
+        </svg>
+      </div>
+    </div>
+
+    <aside class="dossie" id="dossie" aria-label="Ficha técnica da ocorrência">
+      <div class="dossie-topo">
+        <button class="fechar" id="fecharDossie" aria-label="Fechar ficha">✕</button>
+        <div class="selo"><span class="cd" id="dCod">—</span><span class="nn" id="dNum">—</span></div>
+        <h2 id="dNome">—</h2>
+        <div class="fitas" id="dFitas"></div>
+      </div>
+      <div class="dossie-corpo">
+        <div class="secao">
+          <span class="rotulo">Comentários sobre a coordenada</span>
+          <div class="grade-coord">
+            <div><span class="k">Latitude</span><span class="v" id="dLat">—</span></div>
+            <div><span class="k">Longitude</span><span class="v" id="dLon">—</span></div>
+            <div><span class="k">Distância na via</span><span class="v" id="dDist">—</span></div>
+            <div><span class="k">Data do registro</span><span class="v" id="dData">—</span></div>
+            <div class="larga"><span class="k">Endereço aproximado</span><span class="v" id="dEnd">—</span></div>
+            <div class="larga"><span class="k">Posição na seção transversal</span><span class="v" id="dPos">—</span></div>
+            <div class="larga"><span class="k">Observação da equipe</span><span class="v" id="dObs">—</span></div>
+          </div>
+        </div>
+        <div class="secao"><span class="rotulo">O que foi registrado</span><p id="dDesc">—</p></div>
+        <div class="secao"><span class="rotulo">Possível motivo da não conformidade</span><p id="dCausa">—</p></div>
+        <div class="secao"><span class="rotulo">Causas prováveis</span><ul class="causas-lista" id="dCausas"></ul></div>
+        <div class="secao"><span class="rotulo">Agentes deflagradores</span><div class="agentes" id="dAgentes"></div></div>
+        <div class="secao"><span class="rotulo">Intervenção recomendada</span>
+          <div class="acao"><div class="p" id="dPrio">—</div><div class="t" id="dAcao">—</div></div></div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- ============ PAINEL ============ -->
+  <section id="painel" hidden aria-label="Documentação técnica">
+    <div class="painel-barra">
+      <div class="marca-min">
+        <img src="assets/img/logo-rota.webp" alt="">
+        <div><div class="t">ROTA ENGENHARIA</div><div class="s">Estrada do Encanamento · Recife/PE</div></div>
+      </div>
+      <div class="abas" role="tablist">
+        <button role="tab" data-aba="memorial" aria-selected="true">Memorial fotográfico</button>
+        <button role="tab" data-aba="danos" aria-selected="false">Mapa de danos</button>
+        <button role="tab" data-aba="causas" aria-selected="false">Mapa de causas</button>
+        <button role="tab" data-aba="relatorio" aria-selected="false">Relatório</button>
+      </div>
+      <button class="fechar-painel" id="fecharPainel" aria-label="Fechar e voltar ao mapa"><span aria-hidden="true">✕</span> <span class="so-desk">Voltar ao mapa</span><span class="so-mob">Mapa</span></button>
+    </div>
+
+    <div class="painel-corpo">
+
+      <!-- MEMORIAL -->
+      <div class="aba-conteudo" id="abaMemorial">
+        <div class="faixa-slide"><span class="pt">ROTA ENGENHARIA</span> · Relatório fotográfico · Estrada do Encanamento, Recife</div>
+        <span class="rotulo">Apêndice A</span>
+        <h2 class="tit">Memorial fotográfico</h2>
+        <p class="sub">Nove ocorrências registradas nas vistorias de 03, 04 e 06 de outubro de 2026</p>
+        <p class="txt-col">Cada fotografia traz, gravada na própria imagem, a data, a hora, o endereço aproximado e as coordenadas geográficas obtidas em campo (precisão informada de ±14 m). Toque em uma foto para ampliá-la, ou use <strong>Ver na via</strong> para abrir a ocorrência no modo imersivo.</p>
+        <h3 class="sec">Fichas das ocorrências</h3>
+        <div class="memorial" id="gradeMemorial"></div>
+      </div>
+
+      <!-- MAPA DE DANOS -->
+      <div class="aba-conteudo" id="abaDanos" hidden>
+        <div class="faixa-slide"><span class="pt">ROTA ENGENHARIA</span> · Mapa de danos · Estrada do Encanamento, Recife</div>
+        <span class="rotulo">Prancha 01</span>
+        <h2 class="tit">Mapa de danos — planta e detalhes</h2>
+        <p class="sub">Representação em planta das nove ocorrências, com hachuras por tipo de defeito</p>
+        <div class="aviso">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--ouro)" aria-hidden="true"><path d="M8 .8 15.5 14H.5z"/><rect x="7.1" y="5.4" width="1.8" height="4.6" fill="#17181A"/><rect x="7.1" y="11" width="1.8" height="1.8" fill="#17181A"/></svg>
+          <div class="t"><strong>Base das medidas.</strong> As posições longitudinais (0 a 2.549 m) vêm do georreferenciamento das fotos e são precisas dentro de ±14 m. As larguras da seção transversal são as estimativas visuais registradas no relatório — faixas de 3,0 m a 3,5 m, ciclofaixa de ≈1,5 m e plataforma de 8 m a 9 m — e devem ser confirmadas com trena. As dimensões de cada defeito estão assinaladas como <span class="num">estimadas</span>: o levantamento foi exclusivamente visual e o campo "DIMENSÕES" do relatório fotográfico permanece como <span class="num">[medir em campo]</span>.</div>
+        </div>
+
+        <h3 class="sec">Planta linear do trecho — estaqueamento e localização dos defeitos</h3>
+        <div class="prancha">
+          <div class="prancha-topo">
+            <span class="nome">PR-01 · Planta linear de danos</span>
+            <span class="esc">Esc. horizontal 1:2000 · Esc. transversal 1:200 (escalas distintas)</span>
+          </div>
+          <svg id="cadPlanta" aria-label="Planta linear com a localização dos nove defeitos"></svg>
+        </div>
+        <div class="explica" id="explicaDanos"></div>
+        <p class="dica-rolagem">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--ouro)" aria-hidden="true"><path d="M1 8h14M11 4l4 4-4 4"/><path d="M0 7h16v2H0z" opacity=".001"/><path d="M10.5 3.2 15.3 8l-4.8 4.8-1.4-1.4L11.1 9H.8V7h10.3L9.1 4.6z"/></svg>
+          Deslize a prancha para o lado para percorrer os 2.549 m do trecho. Toque em uma ocorrência para ver a explicação.
+        </p>
+
+        <h3 class="sec">Legenda de hachuras</h3>
+        <div class="leg-hachuras" id="legHachuras"></div>
+
+        <h3 class="sec">Detalhes ampliados — um por ocorrência</h3>
+        <p class="txt-col">Cada detalhe mostra a ocorrência em planta, posicionada na seção transversal real da via, com as cotas em metros e a escala gráfica. A seção adotada é: ciclofaixa 1,50 m · faixa de rolamento 3,25 m · faixa junto ao meio-fio 3,25 m · sarjeta 0,50 m — plataforma de 8,50 m entre meios-fios.</p>
+        <div class="detalhes" id="gradeDetalhes"></div>
+      </div>
+
+      <!-- MAPA DE CAUSAS -->
+      <div class="aba-conteudo" id="abaCausas" hidden>
+        <div class="faixa-slide"><span class="pt">ROTA ENGENHARIA</span> · Mapa de possíveis causas · Estrada do Encanamento, Recife</div>
+        <span class="rotulo">Prancha 02</span>
+        <h2 class="tit">Mapa de possíveis causas</h2>
+        <p class="sub">Onde cada agente deflagrador atua ao longo da via</p>
+        <p class="txt-col">O mapa abaixo repete a planta linear, mas agora cada ocorrência é lida pelos <strong>agentes que a deflagraram</strong>. As faixas de fundo mostram as duas zonas de concentração identificadas no levantamento: a <strong>faixa junto ao meio-fio</strong>, por onde trafegam os ônibus e caminhões, e a <strong>sarjeta</strong>, onde a água se acumula. Seis das nove ocorrências estão sobre essas duas faixas.</p>
+
+        <h3 class="sec">Planta temática de causas</h3>
+        <div class="prancha">
+          <div class="prancha-topo">
+            <span class="nome">PR-02 · Mapa de possíveis causas</span>
+            <span class="esc">Esc. horizontal 1:2000 · Esc. transversal 1:200</span>
+          </div>
+          <svg id="cadCausas" aria-label="Planta linear temática com os agentes deflagradores de cada defeito"></svg>
+        </div>
+        <div class="explica" id="explicaCausas"></div>
+
+        <h3 class="sec">Os quatro agentes</h3>
+        <div class="cards-causa" id="cardsCausa"></div>
+
+        <h3 class="sec">Ciclo de degradação observado na via</h3>
+        <p class="txt-col">A sequência abaixo é a leitura que o conjunto das nove ocorrências permite fazer: o mesmo processo aparece em estágios diferentes ao longo do trecho — da malha de fadiga ainda fechada (defeito 04) até a cavidade aberta com água dentro (defeito 06).</p>
+        <div class="prancha prancha-fluxo">
+          <svg id="fluxoCausas" aria-label="Ciclo de degradação do pavimento, da fadiga até a panela"></svg>
+        </div>
+
+        <h3 class="sec">Matriz defeito × agente deflagrador</h3>
+        <div class="tab-wrap">
+          <table>
+            <thead><tr><th>Defeito</th><th>Água / drenagem</th><th>Tráfego pesado</th><th>Envelhecimento</th><th>Reparo inadequado</th></tr></thead>
+            <tbody id="tabAgentes"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RELATÓRIO -->
+      <div class="aba-conteudo" id="abaRelatorio" hidden>
+        <div class="faixa-slide"><span class="pt">ROTA ENGENHARIA</span> · Relatório técnico · Estrada do Encanamento, Recife</div>
+        <span class="rotulo">Relatório técnico sintético nº 001/2026</span>
+        <h2 class="tit">Diagnóstico de defeitos do pavimento</h2>
+        <p class="sub">Cliente: Pedro Oliveira Engenharia – PoliEng · Ofício nº 001/2026 · Norma DNIT 005/2003 – TER</p>
+
+        <div class="olho"><span class="nn">01</span><span class="tt">Identificação</span></div>
+        <p class="sub-sec">Dados da vistoria</p>
+        <div class="tiles">
+          <div class="tile"><div class="v">≈ 700 m</div><div class="k">extensão do recorte definido no ofício</div></div>
+          <div class="tile"><div class="v">2.549 m</div><div class="k">entre a primeira e a última ocorrência registrada</div></div>
+          <div class="tile"><div class="v">9</div><div class="k">ocorrências de 7 tipos distintos pela DNIT 005/2003</div></div>
+          <div class="tile"><div class="v">03 · 04 · 06</div><div class="k">dias de vistoria de campo em outubro de 2026</div></div>
+        </div>
+        <div class="dados-via">
+          <div><span class="k">Cliente</span><span class="v">PoliEng – Pedro Oliveira Engenharia</span></div>
+          <div><span class="k">Via</span><span class="v">Estrada do Encanamento – Recife/PE</span></div>
+          <div><span class="k">Trecho estudado</span><span class="v">Hospital de Olhos → Clube Alemão</span></div>
+          <div><span class="k">Revestimento</span><span class="v">Concreto betuminoso usinado a quente (CBUQ)</span></div>
+          <div><span class="k">Bairros atravessados</span><span class="v">Casa Forte · Parnamirim · Casa Amarela</span></div>
+          <div><span class="k">Referência</span><span class="v">Norma DNIT 005/2003 – TER</span></div>
+        </div>
+
+        <div class="olho"><span class="nn">02</span><span class="tt">Localização</span></div>
+        <p class="sub-sec">Croqui do trecho estudado</p>
+        <figure class="figura">
+          <img src="assets/img/croqui-trecho.webp" width="1480" height="559" loading="lazy" decoding="async" alt="Croqui do trecho da Estrada do Encanamento, do Hospital de Olhos ao Clube Alemão">
+          <figcaption><b>Figura 1 — Croqui de localização.</b> Trecho marcado: Estrada do Encanamento, do Hospital de Olhos ao Clube Alemão (≈ 700 m). Como a via é contínua e mantém as mesmas características de tráfego e de pavimento, o levantamento foi estendido a leste, cobrindo cerca de 2,5 km entre o primeiro e o último defeito registrado. Fonte: Google Maps (2026), adaptado pela equipe.</figcaption>
+        </figure>
+
+        <div class="olho"><span class="nn">03</span><span class="tt">Metodologia</span></div>
+        <p class="sub-sec">Como o levantamento foi feito</p>
+        <div class="passos">
+          <div class="passo"><div class="n">01</div><h5>Inspeção visual</h5>
+            <p>Percurso a pé pela via, com observação do revestimento, dos bordos, do meio-fio, da sarjeta e dos dispositivos de drenagem.</p></div>
+          <div class="passo"><div class="n">02</div><h5>Registro fotográfico</h5>
+            <p>Fotografia de cada ocorrência com aplicativo que grava na imagem a data, a hora, o endereço aproximado e as coordenadas (precisão informada de ±14 m).</p></div>
+          <div class="passo"><div class="n">03</div><h5>Classificação DNIT</h5>
+            <p>Codificação de cada defeito conforme a DNIT 005/2003 – TER. Trincas enquadradas em FC-1, FC-2 e FC-3; a severidade é critério da equipe, não previsto na norma.</p></div>
+          <div class="passo"><div class="n">04</div><h5>Mapeamento</h5>
+            <p>Coordenadas plotadas em planta e projetadas sobre o eixo da via, com a distância de cada ocorrência medida a partir do defeito 06, o mais a oeste.</p></div>
+        </div>
+        <p class="txt-col"><strong>Classes de trincas isoladas:</strong> FC-1 — abertura até 1,0 mm · FC-2 — acima de 1,0 mm sem erosão nas bordas · FC-3 — acima de 1,0 mm com erosão nas bordas.</p>
+
+        <div class="olho"><span class="nn">04</span><span class="tt">Equipe em campo</span></div>
+        <p class="sub-sec">Comprovação da vistoria presencial — registros georreferenciados na própria via</p>
+        <div class="equipe-campo">
+          <div class="pessoa">
+            <div class="rt" style="background-image:url('assets/img/equipe-roberto.jpg')"></div>
+            <div class="inf"><div class="nm">Roberto de Moraes Cardoso Filho</div>
+              <div class="fn">Coordenação técnica e redação do relatório</div>
+              <div class="gp">06/10/2026 · 05:30<br>Estr. do Encanamento, 785</div></div>
+          </div>
+          <div class="pessoa">
+            <div class="rt" style="background-image:url('assets/img/equipe-jose-lucas.jpg')"></div>
+            <div class="inf"><div class="nm">Jose Lucas Soares Victor</div>
+              <div class="fn">Levantamento de campo e memorial fotográfico</div>
+              <div class="gp">04/10/2026 · 17:32<br>Estr. do Encanamento, 455</div></div>
+          </div>
+          <div class="pessoa">
+            <div class="rt" style="background-image:url('assets/img/equipe-gustavo.jpg')"></div>
+            <div class="inf"><div class="nm">Gustavo Luiz de Almeida Silva</div>
+              <div class="fn">Mapa de defeitos e georreferenciamento</div>
+              <div class="gp">03/10/2026 · 09:44<br>Estr. do Encanamento, 271</div></div>
+          </div>
+          <div class="pessoa">
+            <div class="rt" style="background-image:url('assets/img/equipe-matheus.jpg')"></div>
+            <div class="inf"><div class="nm">Matheus Vinício Gonçalves da Silva</div>
+              <div class="fn">Geometria, drenagem e proposta de terraplenagem</div>
+              <div class="gp">06/10/2026 · 09:11<br>Estr. do Encanamento, 233</div></div>
+          </div>
+        </div>
+
+        <h3 class="sec">Síntese</h3>
+        <p>O levantamento identificou <strong>nove ocorrências de sete tipos distintos</strong> pela terminologia da Norma DNIT 005/2003 – TER (J, JE, P, RS, D, ALP e O), registradas nas vistorias de 03, 04 e 06 de outubro de 2026, com registro fotográfico georreferenciado.</p>
+        <p>Seis das nove ocorrências (06, 07, 11, 15, 16 e 19) estão na faixa junto ao meio-fio ou na própria sarjeta — justamente onde a água se acumula e por onde trafegam os ônibus e caminhões. Três agentes predominam: <strong>a água mal drenada junto ao meio-fio</strong>, <strong>o tráfego pesado concentrado nessa faixa</strong> e <strong>o envelhecimento do revestimento</strong>, agravado por reparos que não trataram a origem dos problemas.</p>
+        <p>Por se tratar de avaliação exclusivamente visual, não foram realizadas medições, sondagens ou ensaios. As conclusões sobre as camadas inferiores são inferências a partir do tipo e da posição dos defeitos e devem ser confirmadas pela investigação proposta.</p>
+
+        <h3 class="sec">Quadro-resumo das ocorrências</h3>
+        <div class="tab-wrap">
+          <table>
+            <thead><tr><th>Nº</th><th>Cód.</th><th>Defeito</th><th>Classe / severidade</th><th>Posição na via</th><th>Dist.</th></tr></thead>
+            <tbody id="tabResumo"></tbody>
+          </table>
+        </div>
+
+        <h3 class="sec">Geometria e drenagem</h3>
+        <p>Pista simples em CBUQ, confinada por meio-fio e sarjeta, sem acostamento. Duas faixas de rolamento separadas por linha branca tracejada e ciclofaixa demarcada em vermelho junto a um dos bordos. Por estimativa visual, cada faixa tem entre 3,0 m e 3,5 m e a ciclofaixa cerca de 1,5 m, resultando em plataforma da ordem de 8 m a 9 m entre meios-fios — dimensões a confirmar com trena.</p>
+        <p>A drenagem é exclusivamente superficial. A avaliação visual indica eficiência insuficiente em pontos localizados: empoçamento permanente na sarjeta da parada de ônibus (defeito 11) e dentro da panela do nº 863 (defeito 06); obstrução das sarjetas por folhas e papéis acumulados (defeitos 15 e 16); e juntas abertas entre o revestimento e o meio-fio, por onde a água infiltra nas camadas do pavimento.</p>
+
+        <h3 class="sec">Proposta de intervenção de terraplenagem</h3>
+        <p>Panelas, trincas com erosão e afundamentos plásticos indicam que o comprometimento não se limita ao revestimento: a água já atingiu a base e, possivelmente, o subleito. Nesses pontos, um novo remendo superficial repetiria o ciclo observado no defeito 07. Propõe-se a <strong>reconstrução localizada das camadas do pavimento</strong>, associada à correção da drenagem que deu origem aos defeitos.</p>
+        <ul>
+          <li><strong>Investigação prévia</strong> — sondagens a trado ou poços de inspeção nos pontos críticos; ensaios de caracterização, Proctor e ISC; cadastro das redes enterradas junto às concessionárias.</li>
+          <li><strong>Demarcação e corte</strong> — segmentos retangulares com folga de ≈0,30 m além da área afetada e corte com serra para obter bordas verticais.</li>
+          <li><strong>Escavação (corte de caixa)</strong> — remoção do revestimento e da base comprometidos, com profundidade estimada de 0,40 m a 0,60 m, a confirmar pelas sondagens.</li>
+          <li><strong>Tratamento do subleito</strong> — substituição do solo saturado por solo selecionado, compactado em camadas de até 0,20 m com controle de umidade e grau de compactação.</li>
+          <li><strong>Drenagem</strong> — regularização da declividade das sarjetas, limpeza e ampliação das bocas de lobo e dreno raso longitudinal junto ao meio-fio nos pontos de empoçamento (defeitos 06 e 11).</li>
+          <li><strong>Recomposição do pavimento</strong> — base em brita graduada simples, imprimação, pintura de ligação e revestimento em CBUQ, com selagem das juntas.</li>
+        </ul>
+
+        <h3 class="sec">Ordem de prioridade</h3>
+        <div class="prioridades">
+          <div class="prio"><span class="ordem">1</span><span class="d"><b>Reconstrução localizada — defeitos 06, 07 e 18</b>Panelas de severidade alta, com cavidade aberta e risco imediato a motociclistas e ciclistas.</span></div>
+          <div class="prio"><span class="ordem">2</span><span class="d"><b>Trincas com erosão e deformações em remendo — defeitos 19, 15 e 16</b>Estágio em que a água penetra livremente e o material começa a se desprender.</span></div>
+          <div class="prio"><span class="ordem">3</span><span class="d"><b>Fresagem e recomposição — defeitos 04, 09 e 11</b>Tratamento sem escavação, desde que a drenagem seja corrigida em conjunto.</span></div>
+        </div>
+        <p>A correção da drenagem deve acompanhar todas as etapas, pois, sem ela, os defeitos tendem a reaparecer.</p>
+
+        <h3 class="sec">Riscos da intervenção</h3>
+        <ul>
+          <li>Interferência com redes enterradas de água, esgoto, energia, gás e telecomunicações — o próprio nome da via remete à antiga tubulação de abastecimento que acompanhava seu traçado.</li>
+          <li>Instabilidade das paredes da escavação, do meio-fio e da calçada adjacente.</li>
+          <li>Danos às raízes das árvores de grande porte, com risco de comprometer sua estabilidade.</li>
+          <li>Chuvas durante a obra, que saturam o subleito exposto — recomenda-se executar no período seco (setembro a fevereiro).</li>
+          <li>Recalques futuros caso o controle de compactação seja insuficiente.</li>
+          <li>Acidentes com pedestres, ciclistas e motociclistas na área de obra.</li>
+        </ul>
+
+        <h3 class="sec">Impactos e medidas mitigadoras</h3>
+        <div class="tab-wrap tab-mitigacao">
+          <table>
+            <thead><tr><th>Impacto</th><th>Medida mitigadora</th></tr></thead>
+            <tbody>
+              <tr><td>Tráfego e mobilidade</td><td>Execução por segmentos em meia pista, sinalização de obra, desvio provisório da ciclofaixa e da parada de ônibus, trabalho fora dos horários de pico.</td></tr>
+              <tr><td>Acesso de lindeiros</td><td>Comunicação prévia aos moradores e estabelecimentos; manutenção permanente de passagem para garagens e veículos de emergência.</td></tr>
+              <tr><td>Poeira e ruído</td><td>Umectação das áreas de trabalho, caminhões com caçamba coberta e restrição de horário para equipamentos ruidosos.</td></tr>
+              <tr><td>Resíduos e sedimentos</td><td>Destinação a áreas licenciadas conforme CONAMA 307/2002, reaproveitamento do fresado, proteção das bocas de lobo e limpeza das galerias ao final.</td></tr>
+              <tr><td>Arborização</td><td>Acompanhamento de profissional habilitado, escavação manual junto às raízes e autorização do órgão municipal para eventuais podas.</td></tr>
+              <tr><td>Redes enterradas</td><td>Cadastro junto às concessionárias, sondagens e escavação manual nas proximidades das redes.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="sec">Referências</h3>
+        <ul>
+          <li>DNIT. <strong>DNIT 005/2003 – TER</strong>: defeitos nos pavimentos flexíveis e semirrígidos — terminologia. Rio de Janeiro: IPR, 2003.</li>
+          <li>DNIT. <strong>DNIT 106/2009 – ES</strong>: terraplenagem — cortes. Rio de Janeiro: IPR, 2009. · <strong>DNIT 108/2009 – ES</strong>: terraplenagem — aterros. Rio de Janeiro: IPR, 2009.</li>
+          <li>DNIT. <strong>Manual de drenagem de rodovias</strong> (IPR 724) e <strong>Manual de restauração de pavimentos asfálticos</strong> (IPR 720). 2. ed. Rio de Janeiro: IPR, 2006.</li>
+          <li>BERNUCCI, L. B. et al. <strong>Pavimentação asfáltica</strong>: formação básica para engenheiros. Rio de Janeiro: Petrobras; ABEDA, 2006.</li>
+          <li>BRASIL. CONAMA. <strong>Resolução nº 307</strong>, de 5 de julho de 2002. Gestão dos resíduos da construção civil. Brasília, 2002.</li>
+          <li>CONTRAN. <strong>Manual Brasileiro de Sinalização de Trânsito</strong>: volume IV — sinalização horizontal. Brasília, 2007.</li>
+        </ul>
+
+        <div class="rodape">
+          <img src="assets/img/logo-rota.webp" alt="Rota Engenharia">
+          <div class="t">Rota Engenharia · Disciplina Estradas 2 — 2026.2 · Recife, outubro de 2026<br>
+          Norma de referência: DNIT 005/2003 – TER. Fotografias, coordenadas e desenhos: a equipe (2026).</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="lupa" hidden>
+    <button class="x" id="fecharLupa" aria-label="Fechar imagem">✕</button>
+    <img id="lupaImg" src="" alt="">
+    <div class="cap" id="lupaCap"></div>
+  </div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
