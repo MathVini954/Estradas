@@ -63,11 +63,11 @@ const DEFEITOS = [
     acao:"Fresagem e recomposição do revestimento antes que a malha evolua para FC-3 e, em seguida, para panela.",
     foto:"assets/img/defeito-04.jpg", hot:[48,67], cad:{y0:1.60, l:2.80, c:4.50, h:"trinca"} },
 
-  { n:"18", cod:"P", nome:"Panela com trincas interligadas", classe:"FC-2 nas trincas", sev:"alta", dist:1492,
-    lat:"−8,036221", lon:"−34,905614", x:1354, y:608,
+  { n:"18", cod:"P", nome:"Panela com trincas interligadas", classe:"FC-2 nas trincas", sev:"alta", dist:401,
+    lat:"−8,031831", lon:"−34,914437", x:382, y:121,
     data:"04/10/2026 · 05:33", endereco:"Estr. do Encanamento, 443 — Parnamirim, Recife/PE",
     posicao:"Faixa de rolamento, altura do nº 443",
-    obs:"Fora do trecho do ofício, na continuação da via — mesmas características de tráfego e de pavimento.",
+    obs:"Dentro do trecho do ofício, a ≈ 17 m do defeito 07 e a ≈ 5 m do defeito 19 (fotos das 05:33) — um dos pontos de maior concentração de danos da via.",
     desc:"Trincas interligadas no revestimento, com formação de panela e perda de material na superfície.",
     causa:"A malha de fadiga evoluiu: com a infiltração pelas fissuras, a base perdeu suporte e o revestimento se desprendeu ao centro da malha, abrindo a cavidade. O envelhecimento do ligante acelera o desplacamento.",
     causas:["Fadiga do revestimento asfáltico","Infiltração de água nas camadas do pavimento","Ação repetida das cargas do tráfego"],
@@ -75,8 +75,8 @@ const DEFEITOS = [
     acao:"Reconstrução localizada das camadas, com demarcação retangular e folga de ≈0,30 m além da área trincada.",
     foto:"assets/img/defeito-18.jpg", hot:[62,58], cad:{y0:5.00, l:2.00, c:2.60, h:"panela"} },
 
-  { n:"19", cod:"JE", nome:"Trincas interligadas com erosão", classe:"FC-3", sev:"media", dist:1550,
-    lat:"−8,036745", lon:"−34,905593", x:1356, y:666,
+  { n:"19", cod:"JE", nome:"Trincas interligadas com erosão", classe:"FC-3", sev:"media", dist:402,
+    lat:"−8,031800", lon:"−34,914412", x:385, y:117,
     data:"04/10/2026 · 05:33", endereco:"Estr. do Encanamento, 455 — Casa Forte, Recife/PE",
     posicao:"Faixa de rolamento junto ao bordo, altura do nº 455",
     obs:"Classe FC-3: abertura acima de 1,0 mm com erosão nas bordas — a água já penetra livremente.",
@@ -87,8 +87,8 @@ const DEFEITOS = [
     acao:"Tratamento das trincas com erosão e selagem das juntas junto ao meio-fio, com correção simultânea da drenagem do bordo.",
     foto:"assets/img/defeito-19.jpg", hot:[22,61], cad:{y0:6.40, l:1.60, c:5.50, h:"trinca-erosao"} },
 
-  { n:"15", cod:"ALP", nome:"Afundamento local plástico em remendo", classe:"Sem classe FC", sev:"media", dist:2549,
-    lat:"−8,043918", lon:"−34,900087", x:1963, y:1459,
+  { n:"15", cod:"ALP", nome:"Afundamento local plástico em remendo", classe:"Sem classe FC", sev:"media", dist:581,
+    lat:"−8,032322", lon:"−34,912875", x:555, y:174,
     data:"04/10/2026 · 05:38", endereco:"Estr. do Encanamento, 278 — Casa Forte, Recife/PE",
     posicao:"Faixa de rolamento junto ao meio-fio, altura do nº 278",
     obs:"Sarjeta obstruída por grande quantidade de papéis acumulados junto ao meio-fio na vistoria de 04/10.",
@@ -99,11 +99,11 @@ const DEFEITOS = [
     acao:"Remoção do remendo deformado e recomposição com controle de compactação, além da desobstrução e regularização da sarjeta.",
     foto:"assets/img/defeito-15.jpg", hot:[50,55], cad:{y0:5.60, l:2.40, c:3.20, h:"afundamento"} },
 
-  { n:"16", cod:"O", nome:"Ondulação / corrugação em remendo", classe:"Sem classe FC", sev:"media", dist:2560, aprox:true,
-    lat:"sem georreferência", lon:"mesma posição da foto 15", x:2000, y:1500,
+  { n:"16", cod:"O", nome:"Ondulação / corrugação em remendo", classe:"Sem classe FC", sev:"media", dist:604,
+    lat:"−8,032380", lon:"−34,912680", x:576, y:180,
     data:"04/10/2026 · 05:37", endereco:"Estrada do Encanamento, 245 — Casa Forte, Recife/PE",
     posicao:"Faixa de rolamento junto ao meio-fio, altura do nº 245",
-    obs:"A foto 16 não registrou coordenadas; adotou-se a posição da foto 15, tirada no mesmo local. Na prancha, a ocorrência foi afastada 11 m a leste apenas para não se sobrepor ao defeito 15.",
+    obs:"Registrada a ≈ 22 m do defeito 15, na mesma faixa junto ao meio-fio, na aproximação da travessia de pedestres.",
     desc:"Remendo com afundamento e ondulações transversais na superfície, associadas aos esforços de frenagem dos veículos.",
     causa:"Mistura asfáltica instável e compactação insuficiente no reparo, somadas aos esforços tangenciais de frenagem na aproximação da travessia de pedestres.",
     causas:["Deformação plástica do revestimento devido aos esforços de frenagem, especialmente de veículos pesados","Execução inadequada do remendo","Compactação insuficiente do material utilizado"],
@@ -140,7 +140,7 @@ const HACHURAS = {
   ondulacao:     { nome:"Ondulação / corrugação (O)", desc:"Ondas transversais por frenagem" },
   desgaste:      { nome:"Desgaste (D)", desc:"Desagregação superficial junto à sarjeta" }
 };
-const EIXO = [[-240,-95],[0,0],[326,103],[607,189],[1000,395],[1355,637],[1660,1040],[1980,1480],[2200,1690]];
+const EIXO = [[-249,-76],[0,0],[306,94],[612,187],[880,269]];
 
 /* seção transversal adotada (metros, da ciclofaixa ao meio-fio da sarjeta) */
 const SECAO = [
@@ -205,10 +205,8 @@ let gMapa, viaPath;
   }
   med.remove();
 
-  E("path", {d:"M 560 -230 L 1050 -120 L 1120 180 L 760 120 Z", fill:"var(--mapa-verde)"}, gMapa);
-  E("path", {d:"M 1700 560 L 2100 680 L 2060 900 L 1680 790 Z", fill:"var(--mapa-verde)"}, gMapa);
-  E("path", {d:"M 820 -300 C 880 60, 760 320, 900 700", fill:"none", stroke:"var(--mapa-agua)",
-    "stroke-width":16, "stroke-linecap":"round"}, gMapa);
+  E("path", {d:"M 420 -250 L 640 -200 L 660 -60 L 450 -110 Z", fill:"var(--mapa-verde)"}, gMapa);
+  E("path", {d:"M 120 170 L 300 220 L 280 330 L 100 290 Z", fill:"var(--mapa-verde)"}, gMapa);
 
   const med2 = E("path", {d:eixoD, fill:"none"}, gMapa), tot2 = med2.getTotalLength();
   const gs = E("g", {}, gMapa);
@@ -235,9 +233,9 @@ let gMapa, viaPath;
   const tp = E("textPath", {href:"#rotuloVia", startOffset:"26%"}, t);
   tp.textContent = "ESTRADA DO ENCANAMENTO";
 
-  for (const [txt, x, y, fs] of [["Casa Forte",170,-270,30],["Parnamirim",1080,-40,30],
-    ["Casa Amarela",540,470,30],["Sítio da Trindade",840,-170,22],["Hospital de Olhos",-150,160,21],
-    ["Clube Alemão",700,300,21],["R. da Harmonia",300,-140,19]]){
+  for (const [txt, x, y, fs] of [["Casa Forte",120,-220,26],["Parnamirim",800,40,26],
+    ["Casa Amarela",420,330,26],["Hospital de Olhos",-120,90,18],
+    ["Clube Alemão",660,280,18],["R. da Harmonia",330,-60,16]]){
     T(gMapa, x, y, txt, {cor: fs > 25 ? "#6E7480" : "#898F9A", fs, anc:"middle",
       ff:"Arial, sans-serif", fw: fs > 25 ? 700 : 500, ls: fs > 25 ? 3 : .5});
   }
@@ -568,10 +566,17 @@ function cotaV(g, y1, y2, x, txt, cor){
 function desenharPlanta(svg, modo){
   svg.innerHTML = "";
   defsCad(svg);
-  const PX = 0.92;              /* px por metro no sentido longitudinal */
+  const PX = 1.84;              /* px por metro no sentido longitudinal (H 1:1000) */
   const PY = 24;                /* px por metro no sentido transversal */
-  const ML = 108, MT = 118, COMP = 2620;
-  const W = ML + COMP*PX + 150, H = MT + LARG_TOTAL*PY + 370;
+  const ML = 108, MT = 176, COMP = 700, FAIXA_CH = 58;
+  const W = ML + COMP*PX + 150, H = MT + LARG_TOTAL*PY + 370 + FAIXA_CH;
+  /* chamadas: alterna acima/abaixo e empurra para uma segunda faixa quando duas ficariam coladas */
+  const lado = {}, faixa = {}, ultimo = {cima:[], baixo:[]};
+  [...DEFEITOS].sort((a, b) => a.dist - b.dist).forEach((d, k) => {
+    const s = k % 2 === 0 ? "cima" : "baixo", xb = ML + d.dist*PX;
+    let f = 0; while ((ultimo[s][f] ?? -1e9) > xb - 84) f++;
+    ultimo[s][f] = xb; lado[d.n] = s; faixa[d.n] = f;
+  });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("width", W);
   svg.setAttribute("height", H);
@@ -633,14 +638,14 @@ function desenharPlanta(svg, modo){
 
   /* bocas de lobo e referências urbanas */
   if (modo !== "causas"){
-    [[0,"Acesso nº 863"],[342,"Parada de ônibus · R. da Harmonia"],[635,"nº 233 — Clube Alemão"],
-     [1492,"nº 443"],[2549,"Travessia de pedestres · nº 278"]].forEach(([m, txt]) => {
+    [[0,"Acesso nº 863"],[342,"Parada de ônibus · R. da Harmonia"],[581,"nº 278 · travessia de pedestres"],
+     [635,"nº 233 — Clube Alemão"]].forEach(([m, txt], k) => {
       E("line", {x1:X(m), y1:Y(LARG_TOTAL) + 26, x2:X(m), y2:yEst, stroke:"#3C3F44",
         "stroke-width":.6, "stroke-dasharray":"3 3"}, g);
-      T(g, X(m) + 4, Y(LARG_TOTAL) + 44, txt, {cor:"#6B6E73", fs:7});
+      T(g, X(m) + 4, Y(LARG_TOTAL) + 40 + (k % 2) * 9, txt, {cor:"#6B6E73", fs:7});
     });
   }
-  [0, 342, 1492, 2549].forEach(m => {
+  [0, 342, 581].forEach(m => {
     const bx = X(m), by = Y(8.25);
     E("rect", {x:bx - 7, y:by - 3.5, width:14, height:7, fill:"none", stroke:"#3E7E96", "stroke-width":1}, g);
     E("line", {x1:bx - 7, y1:by, x2:bx + 7, y2:by, stroke:"#3E7E96", "stroke-width":.7}, g);
@@ -651,7 +656,7 @@ function desenharPlanta(svg, modo){
     const c = d.cad;
     const x1 = X(d.dist - c.c/2), largPx = Math.max(c.c*PX, 4);
     const y1 = Y(c.y0), altPx = c.l*PY;
-    const acima = i % 2 === 0;
+    const acima = lado[d.n] === "cima", f = faixa[d.n];
     const corD = modo === "causas" ? COR_AG[d.agentes[0]] : HCOR[c.h];
 
     const go = E("g", {class:"ocor", role:"button", tabindex:"0",
@@ -681,7 +686,7 @@ function desenharPlanta(svg, modo){
     }
 
     /* bandeira de chamada */
-    const yB = acima ? MT - 52 : Y(LARG_TOTAL) + 124;
+    const yB = acima ? MT - 52 - f*FAIXA_CH : Y(LARG_TOTAL) + 124 + f*FAIXA_CH;
     const xB = X(d.dist);
     E("line", {x1:xB, y1: acima ? y1 - 10 : y1 + altPx + 10, x2:xB, y2: acima ? yB + 17 : yB - 17,
       stroke:corD, "stroke-width":1.1}, go);
@@ -741,7 +746,7 @@ function desenharPlanta(svg, modo){
   });
   const linhas2 = [
     ["PRANCHA", modo === "causas" ? "PR-02" : "PR-01"],
-    ["ESCALAS", "H 1:2000 · V 1:200"],
+    ["ESCALAS", "H 1:1000 · V 1:200"],
     ["DESENHO", "Gustavo L. A. Silva"]
   ];
   linhas2.forEach(([k, v], i) => {
@@ -1225,7 +1230,7 @@ function enquadrar(){
   const padD = estreito ? 16 : 40;
   const padT = estreito ? alturaDe(".painel-id") + 16 : 90;
   const padB = estreito ? alturaDe(".nav-topo") + alturaDe(".dock") + 24 : 110;
-  const bb = {x:-300, y:-340, w:2740, h:2200};
+  const bb = {x:-170, y:-250, w:1040, h:600};   /* trecho levantado: 0 a 635 m */
   const lw = Math.max(200, W - padE - padD), lh = Math.max(200, H - padT - padB);
   vista.k = Math.min(lw / bb.w, lh / bb.h);
   vista.x = padE + (lw - bb.w * vista.k) / 2 - bb.x * vista.k;
